@@ -8,8 +8,6 @@ import org.springframework.util.StringUtils
 import org.springframework.web.multipart.MultipartFile
 import ru.stnk.vconverter.storage.exception.FileNotFoundException
 import ru.stnk.vconverter.storage.exception.StorageException
-
-import javax.annotation.PostConstruct
 import java.io.IOException
 import java.io.InputStream
 import java.net.MalformedURLException
@@ -17,8 +15,9 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
+import java.util.*
 import java.util.stream.Stream
-import java.util.UUID
+import javax.annotation.PostConstruct
 
 
 @Service
@@ -26,7 +25,9 @@ class FileSystemStorageService(
         properties: StorageProperties
 ): StorageService {
 
-    private val rootLocation: Path = Paths.get(properties.location)
+    private val rootLocation: Path = Paths.get(properties.getLocation())
+
+    private val EXTENSION_SEPARATOR = '.'
 
     @PostConstruct
     override fun init() {
@@ -38,15 +39,20 @@ class FileSystemStorageService(
     }
 
     override fun store(file: MultipartFile): String {
-        val filename: String = StringUtils.cleanPath(UUID.randomUUID().toString())
+
+        val filename: String = StringUtils.cleanPath(
+                UUID.randomUUID().toString()
+                        + EXTENSION_SEPARATOR
+                        + StringUtils.getFilenameExtension(file.originalFilename)
+        )
 
         try {
-            if (file.isEmpty()) {
-                throw StorageException("Не удалось сохранить пустой файл $filename и начальным именем ${file.originalFilename}")
+            if (file.isEmpty) {
+                throw StorageException("Не удалось сохранить пустой файл")
             }
 
             if (filename.contains("..")) {
-                throw StorageException("Не удается сохранить файл с относительным путем вне текущего каталога $filename и начальным именем ${file.originalFilename}")
+                throw StorageException("Не удается сохранить файл с относительным путем вне текущего каталога ${file.originalFilename}")
             }
 
             try {

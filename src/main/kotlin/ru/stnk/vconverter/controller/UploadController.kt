@@ -1,5 +1,7 @@
 package ru.stnk.vconverter.controller
 
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -13,7 +15,11 @@ class UploadController (
 ) {
 
     @PostMapping("/upload")
-    fun handleFileUpload(@RequestParam("file") file: MultipartFile) {
+    fun handleFileUpload(@RequestParam("file") file: MultipartFile) : ResponseEntity<out Any> {
+
+        val name: String = storageService.store(file)
+
+        return ResponseEntity(mapOf("id" to name), HttpStatus.OK)
 
     }
 }

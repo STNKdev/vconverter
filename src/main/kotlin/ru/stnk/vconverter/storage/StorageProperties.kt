@@ -4,9 +4,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 
 
 @ConfigurationProperties(prefix = "storage")
-class StorageProperties (val location: String) {
+class StorageProperties /*(val location: String)*/ {
 
-    /*private lateinit var location: String
+    private lateinit var location: String
 
     fun getLocation(): String {
         return location
@@ -14,5 +14,5 @@ class StorageProperties (val location: String) {
 
     fun setLocation(location: String) {
         this.location = location
-    }*/
+    }
 }
