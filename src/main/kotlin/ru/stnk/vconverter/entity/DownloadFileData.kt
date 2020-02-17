@@ -7,8 +7,7 @@ import javax.persistence.*
 
 
 @Entity
-class UploadFileData: AuditModel() {
-
+class DownloadFileData: AuditModel(), Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -16,15 +15,14 @@ class UploadFileData: AuditModel() {
     var id: Long? = null
 
     @Column(name = "uuid")
-    val uuid: String = UUID.randomUUID().toString()
+    lateinit var uuid: String
 
     @Column(name = "original_name")
     lateinit var originalName: String
 
-    @Column(name = "path")
-    lateinit var path: String
+    @Column(name = "path_video_file")
+    lateinit var pathVideoFile: String
 
-    override fun toString(): String {
-        return "id: $id, creatData: $createdAt, uuid: $uuid, original_name: $originalName, path: $path"
-    }
+    @Column(name = "path_preview_image_file")
+    lateinit var pathImageFile: String
 }

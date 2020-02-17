@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import java.io.Serializable
 import java.util.*
 import javax.persistence.*
 
@@ -21,11 +22,11 @@ abstract class AuditModel {
     @Column(name = "created_at", nullable = false, updatable = false)
     @CreatedDate
     @JsonIgnore
-    lateinit var createdAt: Date
+    var createdAt: Date? = null
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "updated_at", nullable = false)
     @LastModifiedDate
     @JsonIgnore
-    lateinit var updatedAt: Date
+    var updatedAt: Date? = null
 }

@@ -7,7 +7,7 @@ plugins {
     kotlin("jvm") version "1.3.61"
     kotlin("plugin.spring") version "1.3.61"
     kotlin("plugin.jpa") version "1.3.61"
-    //kotlin("plugin.allopen") version "1.3.61"
+    kotlin("plugin.allopen") version "1.3.61"
 }
 
 group = "ru.stnk"
@@ -50,6 +50,12 @@ dependencies {
 
     // Flyway
     //implementation("org.flywaydb:flyway-core")
+}
+
+allOpen {
+    annotation("javax.persistence.Entity")
+    annotation("javax.persistence.Embeddable")
+    annotation("javax.persistence.MappedSuperclass")
 }
 
 tasks.withType<Test> {

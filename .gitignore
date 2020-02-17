@@ -5,6 +5,10 @@ build/
 !**/src/main/**
 !**/src/test/**
 tmp/
+download/
+app.log*
+logs/
+srs/test/resources/*.mp4
 
 ### STS ###
 .apt_generated

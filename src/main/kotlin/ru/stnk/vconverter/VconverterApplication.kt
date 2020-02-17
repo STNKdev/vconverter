@@ -1,17 +1,30 @@
 package ru.stnk.vconverter
 
+import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.runApplication
+import org.springframework.context.annotation.Bean
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing
+import ru.stnk.vconverter.storage.FileSystemStorageService
 import ru.stnk.vconverter.storage.StorageProperties
 
 
 @SpringBootApplication
 @EnableConfigurationProperties(StorageProperties::class)
+@EnableJpaAuditing
 class VconverterApplication
 
 fun main(args: Array<String>) {
 	runApplication<VconverterApplication>(*args)
+
+	@Bean
+	fun init(fileSystemStorageService: FileSystemStorageService): CommandLineRunner {
+		return CommandLineRunner {
+			fileSystemStorageService.deleteAllTemp()
+			fileSystemStorageService.init()
+		}
+	}
 
 	/*val processBuilder = ProcessBuilder()
 

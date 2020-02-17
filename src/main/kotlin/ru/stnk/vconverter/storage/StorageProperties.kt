@@ -3,16 +3,10 @@ package ru.stnk.vconverter.storage
 import org.springframework.boot.context.properties.ConfigurationProperties
 
 
-@ConfigurationProperties(prefix = "storage")
+@ConfigurationProperties(prefix = "storage.location")
 class StorageProperties /*(val location: String)*/ {
 
-    private lateinit var location: String
+    lateinit var temp: String
 
-    fun getLocation(): String {
-        return location
-    }
-
-    fun setLocation(location: String) {
-        this.location = location
-    }
+    lateinit var download: String
 }
