@@ -13,11 +13,7 @@ import ru.stnk.vconverter.storage.StorageProperties
 @SpringBootApplication
 @EnableConfigurationProperties(StorageProperties::class)
 @EnableJpaAuditing
-class VconverterApplication
-
-fun main(args: Array<String>) {
-	runApplication<VconverterApplication>(*args)
-
+class VconverterApplication {
 	@Bean
 	fun init(fileSystemStorageService: FileSystemStorageService): CommandLineRunner {
 		return CommandLineRunner {
@@ -25,6 +21,10 @@ fun main(args: Array<String>) {
 			fileSystemStorageService.init()
 		}
 	}
+}
+
+fun main(args: Array<String>) {
+	runApplication<VconverterApplication>(*args)
 
 	/*val processBuilder = ProcessBuilder()
 
