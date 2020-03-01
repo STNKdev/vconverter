@@ -17,12 +17,16 @@ class DownloadFileData: AuditModel(), Serializable {
     @Column(name = "uuid")
     lateinit var uuid: String
 
-    @Column(name = "original_name")
-    lateinit var originalName: String
+    @Column(name = "directory_name")
+    lateinit var directoryName: String
 
     @Column(name = "path_video_file")
     lateinit var pathVideoFile: String
 
     @Column(name = "path_preview_image_file")
     lateinit var pathImageFile: String
+
+    override fun toString(): String {
+        return "id: $id, createData: $createdAt, uuid: $uuid, directory_name: $directoryName, path_video_file: $pathVideoFile, path_image_file: $pathImageFile"
+    }
 }

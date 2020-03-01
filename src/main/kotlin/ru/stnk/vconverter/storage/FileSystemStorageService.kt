@@ -9,7 +9,9 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.FileSystemUtils
 import org.springframework.util.StringUtils
 import org.springframework.web.multipart.MultipartFile
+import ru.stnk.vconverter.entity.DownloadFileData
 import ru.stnk.vconverter.entity.UploadFileData
+import ru.stnk.vconverter.repository.DownloadFileDataRepository
 import ru.stnk.vconverter.repository.UploadFileDataRepository
 import ru.stnk.vconverter.storage.exception.FileNotFoundException
 import ru.stnk.vconverter.storage.exception.StorageException
@@ -27,14 +29,15 @@ import javax.annotation.PostConstruct
 @Service
 class FileSystemStorageService(
         private val properties: StorageProperties,
-        private val uploadFileDataRepository: UploadFileDataRepository
+        private val uploadFileDataRepository: UploadFileDataRepository,
+        private val downloadFileDataRepository: DownloadFileDataRepository
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(FileSystemStorageService::class.java)
 
-    private val tempDir: Path = Paths.get(properties.temp)
+    val tempDir: Path = Paths.get(properties.temp)
 
-    private val downloadDir: Path = Paths.get(properties.download)
+    val downloadDir: Path = Paths.get(properties.download)
 
     private val EXTENSION_SEPARATOR = '.'
 
@@ -48,9 +51,9 @@ class FileSystemStorageService(
         }
     }
 
-    @Transactional
     fun storeTemp(file: MultipartFile): String {
 
+        logger.debug("Начинаем сохранение файла: ${file.originalFilename.toString()}")
         val uploadFileData = UploadFileData()
         uploadFileData.originalName = file.originalFilename.toString().replace(Regex("""[\h\s\v!@#$%^&()+\-;,:?*\\/'"]"""), "")
 
@@ -82,12 +85,12 @@ class FileSystemStorageService(
 
                 uploadFileData.path = this.tempDir.resolve(filename).toString()
 
-                logger.debug(uploadFileData.toString())
+                val uploadFileDataSave = uploadFileDataRepository.save(uploadFileData)
 
-                uploadFileDataRepository.save(uploadFileData)
+                logger.debug("Сохранили файл: ${(uploadFileDataSave).toString()}")
 
             } catch (e: Exception) {
-                logger.debug("Возникло исключение при сохранении файла в директорию ${this.tempDir} и сохранение пути в базу", e)
+                logger.debug("Возникло исключение при сохранении файла в директорию ${this.tempDir} и сохранении пути в базу", e)
             }
 
         } catch (e: IOException) {
@@ -107,12 +110,21 @@ class FileSystemStorageService(
         }
     }
 
+    fun changeStatus(uuid: String, newStatus: String) {
+        val uploadFileData: UploadFileData? = uploadFileDataRepository.findByUuid(uuid)
+        if (uploadFileData != null) {
+            uploadFileData.status = newStatus
+        } else {
+            throw StorageException("Не удалось сменить статус для файла: ${uploadFileData?.path}")
+        }
+    }
+
     fun loadTemp(uuid: String): Path {
         val uploadFileData: UploadFileData? = uploadFileDataRepository.findByUuid(uuid)
         if (uploadFileData != null) {
             return Paths.get(uploadFileData.path)
         } else {
-            return this.tempDir
+            throw FileNotFoundException("Не удалось найти файл $uuid")
         }
     }
 
@@ -133,7 +145,7 @@ class FileSystemStorageService(
     fun deleteFileTemp(uuid: String) {
         val uploadFileData: UploadFileData? = uploadFileDataRepository.deleteByUuid(uuid)
         if (uploadFileData != null) {
-            FileSystemUtils.deleteRecursively(Paths.get(uploadFileData.path))
+            FileSystemUtils.deleteRecursively(Paths.get(uploadFileData.path).toFile())
         } else {
             throw StorageException("Не удалось удалить файл с uuid: $uuid")
         }
@@ -142,6 +154,48 @@ class FileSystemStorageService(
     fun deleteAllTemp() {
         FileSystemUtils.deleteRecursively(tempDir.toFile())
         uploadFileDataRepository.deleteAll()
+    }
+
+    fun createDirectoryUUIDDownload(uuid: String): Path {
+
+        val dir: Path
+
+        try {
+            dir = Files.createDirectories(downloadDir.resolve(uuid))
+        } catch (e: IOException) {
+            throw StorageException("Не удалось создать директорию $uuid", e)
+        }
+
+        return dir
+    }
+
+    fun storeDownload(downloadFileData: DownloadFileData) {
+        val downloadFileDataSave = downloadFileDataRepository.save(downloadFileData)
+        logger.debug("Сохранили файл: $downloadFileDataSave")
+    }
+
+    fun loadDownloadPath(uuid: String): List<Path> {
+        val downloadFileData: DownloadFileData? = downloadFileDataRepository.findByUuid(uuid)
+        if (downloadFileData != null) {
+            return listOf(Paths.get(downloadFileData.pathVideoFile), Paths.get(downloadFileData.pathImageFile))
+        } else {
+            throw FileNotFoundException("Не удалось найти директорию $uuid")
+        }
+    }
+
+    fun loadAsResourceDownload(uuid: String): List<Resource> {
+        try {
+            val file: List<Path> = loadDownloadPath(uuid)
+            val resourceVideo: Resource = UrlResource(file[0].toUri())
+            val resourceThumbnail: Resource = UrlResource(file[1].toUri())
+            if ((resourceVideo.exists() || resourceVideo.isReadable) && (resourceThumbnail.exists() || resourceThumbnail.isReadable)) {
+                return listOf(resourceVideo, resourceThumbnail)
+            } else {
+                throw FileNotFoundException("Не удалось прочитать файл $uuid")
+            }
+        } catch (e: MalformedURLException) {
+            throw FileNotFoundException("Не удалось прочитать файл $uuid", e)
+        }
     }
 
 }

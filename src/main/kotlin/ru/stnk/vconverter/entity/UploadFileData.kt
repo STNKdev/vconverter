@@ -24,7 +24,11 @@ class UploadFileData: AuditModel() {
     @Column(name = "path")
     lateinit var path: String
 
+    @Column(name = "status")
+    var status: String = "В очереди"
+
     override fun toString(): String {
         return "id: $id, creatData: $createdAt, uuid: $uuid, original_name: $originalName, path: $path"
     }
+
 }

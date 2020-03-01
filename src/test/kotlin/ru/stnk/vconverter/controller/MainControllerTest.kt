@@ -22,7 +22,7 @@ import java.nio.file.Paths
 @ExtendWith(SpringExtension::class)
 @AutoConfigureMockMvc
 @SpringBootTest
-class UploadControllerTest (
+class MainControllerTest (
         @Autowired val mockMvc: MockMvc
 ) {
 
