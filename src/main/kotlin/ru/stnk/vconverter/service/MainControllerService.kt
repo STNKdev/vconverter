@@ -2,12 +2,13 @@ package ru.stnk.vconverter.service
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.core.io.Resource
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import org.springframework.stereotype.Service
 import org.springframework.util.StringUtils
 import org.springframework.web.multipart.MultipartFile
-import ru.stnk.vconverter.entity.UploadFileData
-import ru.stnk.vconverter.repository.UploadFileDataRepository
+import ru.stnk.vconverter.entity.UploadFileStatus
+import ru.stnk.vconverter.repository.UploadFileStatusRepository
 import ru.stnk.vconverter.storage.FileSystemStorageService
 import ru.stnk.vconverter.storage.exception.FileExtentionException
 import ru.stnk.vconverter.task.TaskConvertVideo
@@ -17,7 +18,7 @@ import ru.stnk.vconverter.task.TaskConvertVideo
 class MainControllerService (
         private val storageService: FileSystemStorageService,
         private val taskConvertVideo: TaskConvertVideo,
-        private val uploadFileDataRepository: UploadFileDataRepository,
+        private val uploadFileStatusRepository: UploadFileStatusRepository,
         private val treadPoolTaskExecutor: ThreadPoolTaskExecutor
 ) {
 
@@ -50,12 +51,32 @@ class MainControllerService (
     }
 
     fun checkStatus(uuid: String): String {
-        val uploadFileData: UploadFileData? = uploadFileDataRepository.findByUuid(uuid)
-        if (uploadFileData != null) {
-            return uploadFileData.status
+        val uploadFileStatus: UploadFileStatus? = uploadFileStatusRepository.findByUuid(uuid)
+        if (uploadFileStatus != null) {
+            return uploadFileStatus.status
         } else {
             return "Неверный идентификатор"
         }
+    }
+
+    fun downloadResource(uuid: String): Resource? {
+        val fileExtention: String? = StringUtils.getFilenameExtension(uuid)
+        var uuidWithoutExtension: String = ""
+        if (fileExtention != null) {
+            uuidWithoutExtension = uuid.replace(".$fileExtention", "")
+        }
+        val listResource: List<Resource> = storageService.loadAsResourceDownload(uuidWithoutExtension)
+        var resource: Resource? = null
+        if (listResource.isNotEmpty() && listResource.size == 2) {
+            if (listResource[0].filename.equals(uuid, ignoreCase = true)) {
+                resource = listResource[0]
+            }
+            if (listResource[1].filename.equals(uuid, ignoreCase = true)) {
+                resource = listResource[1]
+            }
+        }
+
+        return resource
     }
 
     /*fun taskTread(uuid: String) {

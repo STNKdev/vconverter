@@ -1,24 +1,16 @@
 package ru.stnk.vconverter
 
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.runApplication
-import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing
 import org.springframework.scheduling.annotation.EnableAsync
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import ru.stnk.vconverter.storage.FileSystemStorageService
 import ru.stnk.vconverter.storage.StorageProperties
-import java.io.BufferedReader
-import java.io.File
-import java.io.InputStream
-import java.io.InputStreamReader
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
-import java.util.function.Consumer
+import java.util.concurrent.Executor
 
 
 @SpringBootApplication

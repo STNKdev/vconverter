@@ -28,9 +28,11 @@ class TaskConvertVideo (
         val fileName = file.fileName
         logger.debug(fileName.toString())
 
-        storageService.changeStatus(uuid, "Обрабатывается")
+        storageService.changeStatus(uuid, "1")
 
+        // Создаём директорию для хранения файлов
         val pathDirectoryUUIDDownload: Path = storageService.createDirectoryUUIDDownload(uuid)
+
         val downloadFileData = DownloadFileData()
         downloadFileData.uuid = uuid
         downloadFileData.directoryName = pathDirectoryUUIDDownload.toString()
@@ -38,7 +40,7 @@ class TaskConvertVideo (
         downloadFileData.pathImageFile = pathDirectoryUUIDDownload.resolve("$uuid.jpg").toString()
         logger.debug(downloadFileData.toString())
 
-        val processBuilder = ProcessBuilder()
+        val processBuilderVideoConverter = ProcessBuilder()
         val isWindows: Boolean = System.getProperty("os.name").toLowerCase().startsWith("windows")
         logger.debug(System.getProperty("os.name").toLowerCase())
 
@@ -47,16 +49,16 @@ class TaskConvertVideo (
         val commandLinuxConvertVideo: List<String> = listOf("sh", "-c", "ffmpeg", "-hide_banner", "-i", file.toString(), "-s", "426x240", downloadFileData.pathVideoFile)
 
         if (isWindows) {
-            processBuilder.command(commandWindowsConvertVideo)
+            processBuilderVideoConverter.command(commandWindowsConvertVideo)
         } else {
-            processBuilder.command(commandLinuxConvertVideo)
+            processBuilderVideoConverter.command(commandLinuxConvertVideo)
         }
 
-        processBuilder.directory(File("./"))
+        processBuilderVideoConverter.directory(File("./"))
 
         try {
 
-            val processConvertVideo: Process = processBuilder.start()
+            val processConvertVideo: Process = processBuilderVideoConverter.start()
 
             // Используется этот поток ¯\_(ツ)_/¯
             val readerConvertVideoError = BufferedReader(InputStreamReader(processConvertVideo.errorStream))
@@ -71,47 +73,68 @@ class TaskConvertVideo (
             val readerConvertVideo = BufferedReader(InputStreamReader(processConvertVideo.inputStream))
             val linesConvertVideo: List<String> = readerConvertVideo.readLines()
             //logger.debug(lines.toString())
-            /*for (line in lines) {
-
-            }*/
+            if (linesConvertVideo.isNotEmpty()) {
+                for (line in linesConvertVideo) {
+                    println(line)
+                }
+            }
 
             val exitCodeConvertVideo: Int = processConvertVideo.waitFor()
-            logger.debug("Tread: ${Thread.currentThread()} : RunTask with uuid: $uuid -> Exited code with: $exitCodeConvertVideo")
+            logger.debug("Tread: ${Thread.currentThread()} : RunTask with uuid: $uuid -> Exited code process Convert Video with: $exitCodeConvertVideo")
 
+            // Вычисляем продолжительность видео для создания превью из середины
             // ffmpeg -hide_banner -ss 235 -i "Робот для РОБОСУМО NXT.mp4" -vframes 1 -an 1/thumbnail.jpg
             val durationStr = miniInfo[0].removePrefix("Duration: ").trim()
             val fullDurationInSeconds = durationStr.substring(0..1).toInt()*60*60 + durationStr.substring(3..4).toInt()*60 + durationStr.substring(6..7).toInt()
+
+            // Создаём новый процесс для превьюшки
+
+            val processBuilderThumbnail = ProcessBuilder()
 
             val commandWindowsThumbnail: List<String> = listOf("cmd.exe", "/c", "ffmpeg", "-hide_banner", "-ss", (fullDurationInSeconds/2).toString(), "-i", file.toString(), "-vframes", "1", "-an", downloadFileData.pathImageFile)
             val commandLinuxThumbnail: List<String> = listOf("sh", "-c", "ffmpeg", "-hide_banner", "-ss", (fullDurationInSeconds/2).toString(), "-i", file.toString(), "-vframes", "1", "-an", downloadFileData.pathImageFile)
 
             if (isWindows) {
-                processBuilder.command(commandWindowsThumbnail)
+                processBuilderThumbnail.command(commandWindowsThumbnail)
             } else {
-                processBuilder.command(commandLinuxThumbnail)
+                processBuilderThumbnail.command(commandLinuxThumbnail)
             }
 
-            val processThumbnail: Process = processBuilder.start()
+            processBuilderThumbnail.directory(File("./"))
 
-            val readerThumbnailError = BufferedReader(InputStreamReader(processConvertVideo.errorStream))
+            val processThumbnail: Process = processBuilderThumbnail.start()
+
+            val readerThumbnailError = BufferedReader(InputStreamReader(processThumbnail.errorStream))
             val linesThumbnailErr: List<String> = readerThumbnailError.readLines()
+            for (line in linesThumbnailErr) {
+                println(line)
+            }
 
-            val readerThumbnail = BufferedReader(InputStreamReader(processConvertVideo.inputStream))
+            val readerThumbnail = BufferedReader(InputStreamReader(processThumbnail.inputStream))
             val linesThumbnail: List<String> = readerThumbnail.readLines()
+            if (linesThumbnail.isNotEmpty()) {
+                for (line in linesThumbnail) {
+                    println(line)
+                }
+            }
 
             val exitCodeProcessThumbnail: Int = processThumbnail.waitFor()
-            logger.debug("Tread: ${Thread.currentThread()} : RunTask with uuid: $uuid -> Exited code with: $exitCodeProcessThumbnail")
+            logger.debug("Tread: ${Thread.currentThread()} : RunTask with uuid: $uuid -> Exited code process create thumbnail with: $exitCodeProcessThumbnail")
 
             if (exitCodeConvertVideo == 0 && exitCodeProcessThumbnail == 0) {
                 storageService.storeDownload(downloadFileData)
                 storageService.deleteFileTemp(uuid)
+                storageService.changeStatus(downloadFileData.uuid, "2", downloadFileData.directoryName)
+
+                logger.debug("Задача завершена")
             } else {
                 logger.debug("Задача не выполенена или выполенена с ошибками $uuid")
             }
 
         }
         catch (e: IOException) {
-            logger.debug(e.message)
+            e.printStackTrace()
+            logger.debug("Ошибка: " + e.message)
         }
         catch (e: InterruptedException) {
             throw IllegalStateException("Задание было прервано", e);

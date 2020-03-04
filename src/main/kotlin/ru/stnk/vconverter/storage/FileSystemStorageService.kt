@@ -11,8 +11,10 @@ import org.springframework.util.StringUtils
 import org.springframework.web.multipart.MultipartFile
 import ru.stnk.vconverter.entity.DownloadFileData
 import ru.stnk.vconverter.entity.UploadFileData
+import ru.stnk.vconverter.entity.UploadFileStatus
 import ru.stnk.vconverter.repository.DownloadFileDataRepository
 import ru.stnk.vconverter.repository.UploadFileDataRepository
+import ru.stnk.vconverter.repository.UploadFileStatusRepository
 import ru.stnk.vconverter.storage.exception.FileNotFoundException
 import ru.stnk.vconverter.storage.exception.StorageException
 import java.io.IOException
@@ -30,6 +32,7 @@ import javax.annotation.PostConstruct
 class FileSystemStorageService(
         private val properties: StorageProperties,
         private val uploadFileDataRepository: UploadFileDataRepository,
+        private val uploadFileStatusRepository: UploadFileStatusRepository,
         private val downloadFileDataRepository: DownloadFileDataRepository
 ) {
 
@@ -51,6 +54,7 @@ class FileSystemStorageService(
         }
     }
 
+    @Transactional
     fun storeTemp(file: MultipartFile): String {
 
         logger.debug("Начинаем сохранение файла: ${file.originalFilename.toString()}")
@@ -87,10 +91,16 @@ class FileSystemStorageService(
 
                 val uploadFileDataSave = uploadFileDataRepository.save(uploadFileData)
 
-                logger.debug("Сохранили файл: ${(uploadFileDataSave).toString()}")
+                logger.debug("Сохранили файл: $uploadFileDataSave")
+
+                val uploadFileStatus = UploadFileStatus()
+                uploadFileStatus.uuid = uploadFileData.uuid
+                uploadFileStatus.path = uploadFileData.path
+                val uploadFileStatusSave = uploadFileStatusRepository.save(uploadFileStatus)
+                logger.debug("Сохранили $uploadFileStatusSave")
 
             } catch (e: Exception) {
-                logger.debug("Возникло исключение при сохранении файла в директорию ${this.tempDir} и сохранении пути в базу", e)
+                logger.debug("Проблема при сохранении файла в директорию ${this.tempDir} и сохранении пути в базу", e)
             }
 
         } catch (e: IOException) {
@@ -110,12 +120,16 @@ class FileSystemStorageService(
         }
     }
 
-    fun changeStatus(uuid: String, newStatus: String) {
-        val uploadFileData: UploadFileData? = uploadFileDataRepository.findByUuid(uuid)
-        if (uploadFileData != null) {
-            uploadFileData.status = newStatus
+    fun changeStatus(uuid: String, newStatus: String, newPath: String? = null) {
+        val uploadFileStatus: UploadFileStatus? = uploadFileStatusRepository.findByUuid(uuid)
+        if (uploadFileStatus != null) {
+            uploadFileStatus.status = newStatus
+            if (newPath != null) {
+                uploadFileStatus.path = newPath
+            }
+            uploadFileStatusRepository.save(uploadFileStatus)
         } else {
-            throw StorageException("Не удалось сменить статус для файла: ${uploadFileData?.path}")
+            throw StorageException("Не удалось сменить статус для файла: ${uploadFileStatus?.path}")
         }
     }
 
@@ -145,7 +159,9 @@ class FileSystemStorageService(
     fun deleteFileTemp(uuid: String) {
         val uploadFileData: UploadFileData? = uploadFileDataRepository.deleteByUuid(uuid)
         if (uploadFileData != null) {
-            FileSystemUtils.deleteRecursively(Paths.get(uploadFileData.path).toFile())
+            val delFSUtils = FileSystemUtils.deleteRecursively(Paths.get(uploadFileData.path))
+            val delFiles = Files.deleteIfExists(Paths.get(uploadFileData.path))
+            logger.debug("Удаление с помощью FileSystemUtils: $delFSUtils, удаление с помощью Files: $delFiles")
         } else {
             throw StorageException("Не удалось удалить файл с uuid: $uuid")
         }
@@ -166,6 +182,7 @@ class FileSystemStorageService(
             throw StorageException("Не удалось создать директорию $uuid", e)
         }
 
+        logger.debug("Создана директория $dir")
         return dir
     }
 
@@ -191,10 +208,10 @@ class FileSystemStorageService(
             if ((resourceVideo.exists() || resourceVideo.isReadable) && (resourceThumbnail.exists() || resourceThumbnail.isReadable)) {
                 return listOf(resourceVideo, resourceThumbnail)
             } else {
-                throw FileNotFoundException("Не удалось прочитать файл $uuid")
+                throw FileNotFoundException("Не удалось прочитать файлы в директории $uuid")
             }
         } catch (e: MalformedURLException) {
-            throw FileNotFoundException("Не удалось прочитать файл $uuid", e)
+            throw StorageException("Не удалось прочитать файлы в директории $uuid", e)
         }
     }
 
