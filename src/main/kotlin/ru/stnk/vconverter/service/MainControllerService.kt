@@ -10,7 +10,7 @@ import org.springframework.web.multipart.MultipartFile
 import ru.stnk.vconverter.entity.UploadFileStatus
 import ru.stnk.vconverter.repository.UploadFileStatusRepository
 import ru.stnk.vconverter.storage.FileSystemStorageService
-import ru.stnk.vconverter.storage.exception.FileExtentionException
+import ru.stnk.vconverter.storage.exception.FileExtensionException
 import ru.stnk.vconverter.task.TaskConvertVideo
 
 
@@ -31,7 +31,7 @@ class MainControllerService (
         logger.debug("Проверка ${file.originalFilename} на допустимое расширение файла")
         when (StringUtils.getFilenameExtension(file.originalFilename)) {
             "mov","avi","wmv","flv","3gp","mp4","mpg" -> uuid = storageService.storeTemp(file)
-            else -> throw FileExtentionException("Недопустимый формат файла")
+            else -> throw FileExtensionException()
         }
 
         // Блокирует поток и ждёт выполнения задачи, можно получить результат
