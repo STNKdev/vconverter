@@ -91,13 +91,13 @@ class FileSystemStorageService(
 
                 val uploadFileDataSave = uploadFileDataRepository.save(uploadFileData)
 
-                logger.debug("Сохранили файл: $uploadFileDataSave")
+                logger.debug("<UPLOAD> Сохранили файл: $uploadFileDataSave")
 
                 val uploadFileStatus = UploadFileStatus()
                 uploadFileStatus.uuid = uploadFileData.uuid
                 uploadFileStatus.path = uploadFileData.path
                 val uploadFileStatusSave = uploadFileStatusRepository.save(uploadFileStatus)
-                logger.debug("Сохранили $uploadFileStatusSave")
+                logger.debug("<STATUS> Сохранили $uploadFileStatusSave")
 
             } catch (e: Exception) {
                 logger.debug("Проблема при сохранении файла в директорию ${this.tempDir} и сохранении пути в базу", e)
@@ -127,7 +127,8 @@ class FileSystemStorageService(
             if (newPath != null) {
                 uploadFileStatus.path = newPath
             }
-            uploadFileStatusRepository.save(uploadFileStatus)
+            val uploadFileStatusSave = uploadFileStatusRepository.save(uploadFileStatus)
+            logger.debug("Сменили статус для $uuid на ${uploadFileStatus.status}")
         } else {
             throw StorageException("Не удалось сменить статус для файла: ${uploadFileStatus?.path}")
         }
@@ -157,11 +158,13 @@ class FileSystemStorageService(
     }
 
     fun deleteFileTemp(uuid: String) {
-        val uploadFileData: UploadFileData? = uploadFileDataRepository.deleteByUuid(uuid)
+        val uploadFileData: UploadFileData? = uploadFileDataRepository.findByUuid(uuid)
+        logger.debug("<DELETE> Файл для удаления: $uploadFileData")
         if (uploadFileData != null) {
+            uploadFileDataRepository.delete(uploadFileData)
             val delFSUtils = FileSystemUtils.deleteRecursively(Paths.get(uploadFileData.path))
-            val delFiles = Files.deleteIfExists(Paths.get(uploadFileData.path))
-            logger.debug("Удаление с помощью FileSystemUtils: $delFSUtils, удаление с помощью Files: $delFiles")
+            //val delFiles = Files.deleteIfExists(Paths.get(uploadFileData.path))
+            logger.debug("Удаление ${uploadFileData.path}: $delFSUtils")
         } else {
             throw StorageException("Не удалось удалить файл с uuid: $uuid")
         }
@@ -188,7 +191,7 @@ class FileSystemStorageService(
 
     fun storeDownload(downloadFileData: DownloadFileData) {
         val downloadFileDataSave = downloadFileDataRepository.save(downloadFileData)
-        logger.debug("Сохранили файл: $downloadFileDataSave")
+        logger.debug("<DOWNLOAD> Сохранили файл: $downloadFileDataSave")
     }
 
     fun loadDownloadPath(uuid: String): List<Path> {

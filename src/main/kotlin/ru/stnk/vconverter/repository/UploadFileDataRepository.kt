@@ -7,5 +7,4 @@ import ru.stnk.vconverter.entity.UploadFileData
 @Repository
 interface UploadFileDataRepository: JpaRepository<UploadFileData, Long> {
     fun findByUuid(uuid: String): UploadFileData?
-    fun deleteByUuid(uuid: String): UploadFileData?
 }

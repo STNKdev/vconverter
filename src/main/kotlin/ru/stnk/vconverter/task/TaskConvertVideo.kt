@@ -11,6 +11,7 @@ import java.io.File
 import java.io.IOException
 import java.io.InputStreamReader
 import java.nio.file.Path
+import java.nio.file.Paths
 import java.util.concurrent.CompletableFuture
 
 @Service
@@ -28,7 +29,7 @@ class TaskConvertVideo (
         val fileName = file.fileName
         logger.debug(fileName.toString())
 
-        storageService.changeStatus(uuid, "1")
+        //storageService.changeStatus(uuid, "1")
 
         // Создаём директорию для хранения файлов
         val pathDirectoryUUIDDownload: Path = storageService.createDirectoryUUIDDownload(uuid)
@@ -39,6 +40,8 @@ class TaskConvertVideo (
         downloadFileData.pathVideoFile = pathDirectoryUUIDDownload.resolve("$uuid.mp4").toString()
         downloadFileData.pathImageFile = pathDirectoryUUIDDownload.resolve("$uuid.jpg").toString()
         logger.debug(downloadFileData.toString())
+
+        storageService.changeStatus(downloadFileData.uuid, "1")
 
         val processBuilderVideoConverter = ProcessBuilder()
         val isWindows: Boolean = System.getProperty("os.name").toLowerCase().startsWith("windows")
@@ -121,23 +124,24 @@ class TaskConvertVideo (
             val exitCodeProcessThumbnail: Int = processThumbnail.waitFor()
             logger.debug("Tread: ${Thread.currentThread()} : RunTask with uuid: $uuid -> Exited code process create thumbnail with: $exitCodeProcessThumbnail")
 
+            logger.debug("Проверяем условие: exitCodeConvertVideo = $exitCodeConvertVideo; exitCodeProcessThumbnail = $exitCodeProcessThumbnail")
             if (exitCodeConvertVideo == 0 && exitCodeProcessThumbnail == 0) {
                 storageService.storeDownload(downloadFileData)
-                storageService.deleteFileTemp(uuid)
                 storageService.changeStatus(downloadFileData.uuid, "2", downloadFileData.directoryName)
+                // Тут происходит что-то невнятное, файлы не удаляются
+                storageService.deleteFileTemp(uuid)
 
-                logger.debug("Задача завершена")
+                logger.debug("Задача $uuid завершена")
             } else {
                 logger.debug("Задача не выполенена или выполенена с ошибками $uuid")
             }
 
         }
         catch (e: IOException) {
-            e.printStackTrace()
-            logger.debug("Ошибка: " + e.message)
+            throw IllegalStateException("Задание было прервано", e)
         }
         catch (e: InterruptedException) {
-            throw IllegalStateException("Задание было прервано", e);
+            throw IllegalStateException("Задание было прервано", e)
         }
 
         return CompletableFuture.completedFuture(true)
