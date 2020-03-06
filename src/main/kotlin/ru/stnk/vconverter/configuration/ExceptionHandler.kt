@@ -8,6 +8,7 @@ import org.springframework.lang.Nullable
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.context.request.WebRequest
+import org.springframework.web.multipart.MultipartException
 import org.springframework.web.servlet.NoHandlerFoundException
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 import ru.stnk.vconverter.configuration.exception.MultipartFileEmptyException
@@ -79,6 +80,13 @@ class ExceptionHandler: ResponseEntityExceptionHandler() {
                                 request: WebRequest)
             :ResponseEntity<RestResponse> {
         return ResponseEntity(RestResponse(154, mapOf("description" to "Файл не найден")), HttpStatus.OK)
+    }
+
+    @ExceptionHandler(MultipartException::class)
+    fun handleMultipartException(ex: MultipartException,
+                                 request: WebRequest)
+            :ResponseEntity<RestResponse> {
+        return ResponseEntity(RestResponse(155, mapOf("description" to "Размер файла слишком велик")), HttpStatus.OK)
     }
 
 }

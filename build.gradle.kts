@@ -58,13 +58,31 @@ allOpen {
     annotation("javax.persistence.MappedSuperclass")
 }
 
-tasks.withType<Test> {
-    useJUnitPlatform()
-}
-
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf("-Xjsr305=strict")
         jvmTarget = "1.8"
+    }
+}
+
+tasks {
+
+    withType<Test>().configureEach {
+        useJUnitPlatform()
+    }
+
+    asciidoctor {
+
+        sourceDir = file("docs/templates")
+        /*sources(delegateClosureOf<PatternSet> {
+            include("toplevel.adoc", "another.adoc", "third.adoc")
+        })*/
+        outputDir = file("docs/html5")
+
+        /*attributes(
+            mapOf(
+                "snippets" to file("build/generated-snippets")
+            )
+        )*/
     }
 }

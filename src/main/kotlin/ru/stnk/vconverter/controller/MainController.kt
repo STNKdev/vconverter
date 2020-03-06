@@ -44,11 +44,11 @@ class MainController (
     @ResponseBody
     fun handleFileDownload(@PathVariable uuid: String): ResponseEntity<Resource> {
         val downloadResource: Resource? = mainService.downloadResource(uuid)
-        logger.debug("Файл для загрузки: ${downloadResource.toString()} , имя файла: ${downloadResource?.filename}")
+        logger.debug("<DOWNLOAD> Файл для загрузки: ${downloadResource.toString()} , имя файла: ${downloadResource?.filename}")
         return ResponseEntity.ok()
                 .header(
                         HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\\" + downloadResource?.filename + "\\")
+                        "attachment; filename=" + downloadResource?.filename)
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(downloadResource)
     }
