@@ -1,7 +1,10 @@
 package ru.stnk.vconverter.configuration.response
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import org.springframework.http.HttpStatus
+import org.springframework.web.bind.annotation.ResponseStatus
 
+@ResponseStatus(HttpStatus.OK)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 class RestResponse {
     var error: Int? = null

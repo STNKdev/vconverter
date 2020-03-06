@@ -9,6 +9,7 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
+import ru.stnk.vconverter.configuration.response.RestResponse
 import ru.stnk.vconverter.service.MainControllerService
 
 
@@ -20,17 +21,17 @@ class MainController (
     val logger: Logger = LoggerFactory.getLogger(MainController::class.java)
 
     @PostMapping("/upload")
-    fun handleFileUpload(@RequestParam("file") file: MultipartFile) : ResponseEntity<out Any> {
+    fun handleFileUpload(@RequestParam("file") file: MultipartFile) : RestResponse {
 
         val name: String = mainService.checkAndSaveFile(file)
 
-        return ResponseEntity(mapOf("id" to name), HttpStatus.OK)
+        return RestResponse(mapOf("id" to name))
 
     }
 
     @GetMapping("/check")
-    fun handleCheckStatus(@RequestParam("id") uuid: String) : ResponseEntity<out Any> {
-        return ResponseEntity(mainService.checkStatus(uuid) ,HttpStatus.OK)
+    fun handleCheckStatus(@RequestParam("id") uuid: String) : RestResponse {
+        return RestResponse(mapOf("status" to mainService.checkStatus(uuid)))
     }
 
     // тут по идее должно работать ".+\\.(mp4|jpg|jpeg)"
