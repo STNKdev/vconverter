@@ -13,7 +13,7 @@ class RestResponse {
     constructor() {}
 
     constructor(data: Map<String, Any>) {
-
+        this.data.putAll(data)
     }
 
     constructor(error: Int, data: Map<String, String>) {

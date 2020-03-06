@@ -1,7 +1,5 @@
 package ru.stnk.vconverter.storage.exception
 
-import java.lang.RuntimeException
-
 open class StorageException: RuntimeException {
 
     constructor(): super() {}

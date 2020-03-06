@@ -1,7 +1,5 @@
 package ru.stnk.vconverter.configuration.exception
 
-import java.lang.RuntimeException
-
 class MultipartFileEmptyException: RuntimeException {
     constructor() : super(){}
     constructor(message: String) : super(message) {}

@@ -1,6 +1,5 @@
 package ru.stnk.vconverter.configuration
 
-import io.undertow.server.RequestTooBigException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -9,7 +8,7 @@ import org.springframework.lang.Nullable
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.context.request.WebRequest
-import org.springframework.web.multipart.MultipartException
+import org.springframework.web.servlet.NoHandlerFoundException
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 import ru.stnk.vconverter.configuration.exception.MultipartFileEmptyException
 import ru.stnk.vconverter.configuration.exception.UuidNotFoundException
@@ -36,6 +35,15 @@ class ExceptionHandler: ResponseEntityExceptionHandler() {
                                               request: WebRequest)
             : ResponseEntity<Any> {
         return ResponseEntity(RestResponse(status.value(), mapOf("description" to ex.localizedMessage)), HttpStatus.OK)
+    }
+
+    override fun handleNoHandlerFoundException(ex: NoHandlerFoundException,
+                                               headers: HttpHeaders,
+                                               status: HttpStatus,
+                                               request: WebRequest)
+            : ResponseEntity<Any> {
+
+        return ResponseEntity(RestResponse(404, mapOf("description" to "Неправильный endpoint")), HttpStatus.OK)
     }
 
     @ExceptionHandler(FileExtensionException::class)

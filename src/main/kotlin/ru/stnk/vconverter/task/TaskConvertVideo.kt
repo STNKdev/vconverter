@@ -11,7 +11,6 @@ import java.io.File
 import java.io.IOException
 import java.io.InputStreamReader
 import java.nio.file.Path
-import java.nio.file.Paths
 import java.util.concurrent.CompletableFuture
 
 @Service
@@ -85,13 +84,12 @@ class TaskConvertVideo (
             val exitCodeConvertVideo: Int = processConvertVideo.waitFor()
             logger.debug("Tread: ${Thread.currentThread()} : RunTask with uuid: $uuid -> Exited code process Convert Video with: $exitCodeConvertVideo")
 
-            // Вычисляем продолжительность видео для создания превью из середины
+            // Вычисляем продолжительность видео для создания превью из середины видео
             // ffmpeg -hide_banner -ss 235 -i "Робот для РОБОСУМО NXT.mp4" -vframes 1 -an 1/thumbnail.jpg
             val durationStr = miniInfo[0].removePrefix("Duration: ").trim()
             val fullDurationInSeconds = durationStr.substring(0..1).toInt()*60*60 + durationStr.substring(3..4).toInt()*60 + durationStr.substring(6..7).toInt()
 
             // Создаём новый процесс для превьюшки
-
             val processBuilderThumbnail = ProcessBuilder()
 
             val commandWindowsThumbnail: List<String> = listOf("cmd.exe", "/c", "ffmpeg", "-hide_banner", "-ss", (fullDurationInSeconds/2).toString(), "-i", file.toString(), "-vframes", "1", "-an", downloadFileData.pathImageFile)
@@ -109,9 +107,9 @@ class TaskConvertVideo (
 
             val readerThumbnailError = BufferedReader(InputStreamReader(processThumbnail.errorStream))
             val linesThumbnailErr: List<String> = readerThumbnailError.readLines()
-            for (line in linesThumbnailErr) {
-                println(line)
-            }
+            /*for (line in linesThumbnailErr) {
+
+            }*/
 
             val readerThumbnail = BufferedReader(InputStreamReader(processThumbnail.inputStream))
             val linesThumbnail: List<String> = readerThumbnail.readLines()

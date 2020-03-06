@@ -49,6 +49,7 @@ class FileSystemStorageService(
         try {
             Files.createDirectories(tempDir)
             Files.createDirectories(downloadDir)
+
         } catch (e: IOException) {
             throw StorageException("Не удалось инициализировать хранилище", e)
         }
