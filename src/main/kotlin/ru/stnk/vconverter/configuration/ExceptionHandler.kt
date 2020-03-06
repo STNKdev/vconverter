@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.context.request.WebRequest
 import org.springframework.web.multipart.MultipartException
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
+import ru.stnk.vconverter.configuration.exception.MultipartFileEmptyException
+import ru.stnk.vconverter.configuration.exception.UuidNotFoundException
 import ru.stnk.vconverter.configuration.response.RestResponse
 import ru.stnk.vconverter.storage.exception.FileExtensionException
 import ru.stnk.vconverter.storage.exception.FileNotFoundException
@@ -41,6 +43,20 @@ class ExceptionHandler: ResponseEntityExceptionHandler() {
                                       request: WebRequest)
             :ResponseEntity<RestResponse> {
         return ResponseEntity(RestResponse(150, mapOf("description" to "Недопустимый формат файла")), HttpStatus.OK)
+    }
+
+    @ExceptionHandler(MultipartFileEmptyException::class)
+    fun handlerMultipartFileEmptyException(ex: MultipartFileEmptyException,
+                                           request: WebRequest)
+            :ResponseEntity<RestResponse> {
+        return ResponseEntity(RestResponse(151, mapOf("description" to "Нет файла в запросе")), HttpStatus.OK)
+    }
+
+    @ExceptionHandler(UuidNotFoundException::class)
+    fun handlerUuidNotFoundException(ex: UuidNotFoundException,
+                                     request: WebRequest)
+            :ResponseEntity<RestResponse>{
+        return ResponseEntity(RestResponse(152, mapOf("description" to "Неверный идентификатор")), HttpStatus.OK)
     }
 
     @ExceptionHandler(FileNotFoundException::class)

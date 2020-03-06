@@ -7,6 +7,8 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import org.springframework.stereotype.Service
 import org.springframework.util.StringUtils
 import org.springframework.web.multipart.MultipartFile
+import ru.stnk.vconverter.configuration.exception.MultipartFileEmptyException
+import ru.stnk.vconverter.configuration.exception.UuidNotFoundException
 import ru.stnk.vconverter.entity.UploadFileStatus
 import ru.stnk.vconverter.repository.UploadFileStatusRepository
 import ru.stnk.vconverter.storage.FileSystemStorageService
@@ -26,6 +28,11 @@ class MainControllerService (
 
     fun checkAndSaveFile (file: MultipartFile): String {
 
+        if (file.isEmpty) {
+            throw MultipartFileEmptyException()
+        }
+
+        // Возвращаемый uuid
         val uuid: String
 
         logger.debug("Проверка ${file.originalFilename} на допустимое расширение файла")
@@ -55,7 +62,7 @@ class MainControllerService (
         if (uploadFileStatus != null) {
             return uploadFileStatus.status
         } else {
-            return "Неверный идентификатор"
+            throw UuidNotFoundException()
         }
     }
 

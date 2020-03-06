@@ -59,6 +59,7 @@ class FileSystemStorageService(
 
         logger.debug("Начинаем сохранение файла: ${file.originalFilename.toString()}")
         val uploadFileData = UploadFileData()
+        // Очищаем имя файла от лишних символов
         uploadFileData.originalName = file.originalFilename.toString().replace(Regex("""[\h\s\v!@#$%^&()+\-;,:?*\\/'"]"""), "")
 
         val filename: String = StringUtils.cleanPath(
@@ -128,7 +129,7 @@ class FileSystemStorageService(
                 uploadFileStatus.path = newPath
             }
             val uploadFileStatusSave = uploadFileStatusRepository.save(uploadFileStatus)
-            logger.debug("Сменили статус для $uuid на ${uploadFileStatus.status}")
+            logger.debug("Сменили статус для $uuid на ${uploadFileStatusSave.status}")
         } else {
             throw StorageException("Не удалось сменить статус для файла: ${uploadFileStatus?.path}")
         }
@@ -189,9 +190,16 @@ class FileSystemStorageService(
         return dir
     }
 
+    @Transactional
     fun storeDownload(downloadFileData: DownloadFileData) {
-        val downloadFileDataSave = downloadFileDataRepository.save(downloadFileData)
-        logger.debug("<DOWNLOAD> Сохранили файл: $downloadFileDataSave")
+        logger.debug("<DOWNLOAD> Проверка существования файлов {'${downloadFileData.pathVideoFile}';'${downloadFileData.pathImageFile}'} и сохранение их в базу")
+        if (Paths.get(downloadFileData.pathVideoFile).toFile().exists()
+                && Paths.get(downloadFileData.pathImageFile).toFile().exists()) {
+            val downloadFileDataSave = downloadFileDataRepository.save(downloadFileData)
+            logger.debug("<DOWNLOAD> Сохранили в базе данные директории: $downloadFileDataSave")
+        } else {
+            throw StorageException("Не удалось сохранить в базе данные в директории, возможно директория или файлы в ней не существуют")
+        }
     }
 
     fun loadDownloadPath(uuid: String): List<Path> {
