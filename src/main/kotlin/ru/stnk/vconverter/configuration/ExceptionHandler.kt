@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.lang.Nullable
+import org.springframework.web.bind.MissingPathVariableException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.context.request.WebRequest
@@ -44,6 +45,14 @@ class ExceptionHandler: ResponseEntityExceptionHandler() {
                                                request: WebRequest)
             : ResponseEntity<Any> {
 
+        return ResponseEntity(RestResponse(404, mapOf("description" to "Неправильный endpoint")), HttpStatus.OK)
+    }
+
+    override fun handleMissingPathVariable(ex: MissingPathVariableException,
+                                           headers: HttpHeaders,
+                                           status: HttpStatus,
+                                           request: WebRequest)
+            : ResponseEntity<Any> {
         return ResponseEntity(RestResponse(404, mapOf("description" to "Неправильный endpoint")), HttpStatus.OK)
     }
 
