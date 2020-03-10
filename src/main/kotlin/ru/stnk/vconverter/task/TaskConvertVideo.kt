@@ -38,7 +38,7 @@ class TaskConvertVideo (
         downloadFileData.directoryName = pathDirectoryUUIDDownload.toString()
         downloadFileData.pathVideoFile = pathDirectoryUUIDDownload.resolve("$uuid.mp4").toString()
         downloadFileData.pathImageFile = pathDirectoryUUIDDownload.resolve("$uuid.jpg").toString()
-        logger.debug(downloadFileData.toString())
+        logger.debug("<DOWNLOAD> <Кандидат на сохранение> $downloadFileData")
 
         storageService.changeStatus(downloadFileData.uuid, "1")
 
