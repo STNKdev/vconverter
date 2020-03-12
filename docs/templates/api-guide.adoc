@@ -1,0 +1,188 @@
+= Инструкция по API
+Aleksandr Sytnik;
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 4
+:sectlinks:
+:toc-title: API
+:operation-curl-request-title: Пример запроса
+:operation-http-response-title: Пример ответа
+
+[[overview]]
+= Краткий обзор
+
+Сервис предназначен для перекодирования видеофайлов
+в одном из форматов: `mov, avi, wmv, flv, 3gp, mp4, mpg`
+размером не более `10MB`,
+в формат `mp4` с фиксированным расширением `426x240`
+и превью в формате `jpg` с расширением исходного файла.
+
+[[overview-http-verbs]]
+== HTTP методы
+
+В этом API используются `GET` запросы и `POST` запрос для загрузки файла.
+
+|===
+| Метод | Использование
+
+| `GET`
+| Используется для всех основных запросов
+
+| `POST`
+| Используется для загрузки файла на обработку
+|===
+
+[[overview-http-status-codes]]
+== HTTP коды состояния
+
+В сервисе используется в основном код состояния `200 OK`.
+
+|===
+| Код состояния | Использование
+
+| `200 OK`
+| Запрос успешно выполнен
+
+| `404 Not Found`
+| Неправильная точка вызова
+
+| `500 Internal Server Error`
+| Внутренняя ошибка сервиса
+|===
+
+[[overview-headers]]
+== Заголовки
+
+Каждый ответ содержит следующие заголовоки:
+
+include::{snippets}/store-upload-file/http-response.adoc[]
+
+[[overview-errors]]
+== Ошибки
+
+Если при запросах будут ошибки, то в ответном JSON объекте в ключе
+`error` будет код ошибки и в ключе `data['description']` ёё описание:
+
+include::{snippets}/exception-bad-request-exception/response-fields.adoc[]
+
+Если не указано иного, то сервис может отвечать следующими кодами ошибок:
+
+* 400 - Неправильный запрос
+
+Код ответа `200 OK`. Возможно вы забыли указать обязательный параметр.
+include::{snippets}/exception-bad-request-exception/response-body.adoc[]
+
+
+* 404 - Неправильная точка вызова
+
+Код ответа `404 NOT FOUND`.
+include::{snippets}/exception-not-found-endpoint-exception/response-body.adoc[]
+
+* 500 - Внутренняя ошибка сервиса
+
+Код ответа `500 INTERNAL SERVER ERROR`.
+
+`{"error":500, "data":{"description":"Внутренняя ошибка сервиса"}}`
+
+[[overview-response]]
+== Ответы
+
+Ответы от сервера приходят в формате `application/json`:
+
+include::{snippets}/store-upload-file/response-body.adoc[]
+
+|===
+| Ключ | Тип | Описание
+
+| `error`
+| `Number`
+| Содержит код ошибки. Если ошибки нет, то отсутствует
+
+| `data`
+| `Object`
+| Содержит данные ответа
+
+|===
+
+
+[[resources]]
+= API
+
+[[resources-upload-file]]
+== Загрузка файла
+
+Точка вызова для загрузки файла `/upload`
+
+[[resources-upload-file-request]]
+=== POST запрос загрузки файла
+
+Загрузка видеофайла размером не более `10MB` осуществляется
+следующим `POST` запросом в формате `multipart/form-data`:
+include::{snippets}/store-upload-file/curl-request.adoc[]
+
+[[resources-upload-file-response]]
+=== Ответ сервера при запросе регистрации
+
+Ответ сервера при успешном запросе содержит `id`
+для отслеживания статуса обработки видеофайла:
+include::{snippets}/store-upload-file/response-body.adoc[]
+
+include::{snippets}/store-upload-file/response-fields.adoc[]
+
+[[resources-upload-file-exception]]
+=== Ошибки при загрузке файла
+
+Если файл гораздо больше `10MB`, то сервер закроет соединение.
+
+Если расширение файла не соответствует одному из перечисленных:
+`mov, avi, wmv, flv, 3gp, mp4, mpg`, то ответом будет:
+include::{snippets}/exception-file-extension/response-body.adoc[]
+
+Если отправить запрос с пустым параметром `file`
+или размер файла будет равен `0MB`, то ответом будет:
+include::{snippets}/exception-multipart-file-empty/response-body.adoc[]
+
+[[resources-check]]
+== Проверка статуса обработки видеофайла
+
+Точка вызова для проверки статуса видеофайла: `/check`
+
+[[resources-check-request]]
+=== Запрос на проверку
+
+Нужно сформировать `GET` запрос с обязательным параметром `id`:
+include::{snippets}/status-in-queue/curl-request.adoc[]
+
+include::{snippets}/status-in-queue/request-parameters.adoc[]
+
+[[resources-check-response]]
+=== Ответ сервера при запросе на проверку
+
+Ответ сервера при успешном `GET` запросе будет включать в себя
+один из трёх возможных статусов:
+
+* В очереди:
+include::{snippets}/status-in-queue/response-body.adoc[]
+
+* Обрабатывается:
+include::{snippets}/status-handles/response-body.adoc[]
+
+* Готово:
+include::{snippets}/status-done/response-body.adoc[]
+
+include::{snippets}/status-in-queue/response-fields.adoc[]
+
+[[resources-check-errors]]
+=== Ошибки при проверке статуса
+
+При проверке статуса обработки видеофайла возможна
+следующая ошибка:
+
+* 152 - Неверный идентификатор
+include::{snippets}/exception-uuid-not-found-exception/response-body.adoc[]
+
+[[resiurces-download-file]]
+== Скачивание итогового видеофайла и превью
+

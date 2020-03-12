@@ -25,7 +25,7 @@ import java.nio.file.Paths
 @AutoConfigureMockMvc
 @SpringBootTest
 @AutoConfigureRestDocs(outputDir = "build/generated-snippets")
-class MainControllerTest (
+class MainControllerUploadTest (
         @Autowired val mockMvc: MockMvc
 ) {
 
@@ -37,7 +37,7 @@ class MainControllerTest (
     @Test
     @Throws(Exception::class)
     fun uploadFile() {
-        val multipartFile: MockMultipartFile = MockMultipartFile(
+        val multipartFile = MockMultipartFile(
                 "file",
                 "внутри лапенко 2 серия.mp4",
                 "multipart/form-data",

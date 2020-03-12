@@ -30,7 +30,7 @@ class ExceptionHandler: ResponseEntityExceptionHandler() {
                                          request: WebRequest)
             : ResponseEntity<Any> {
         ex.printStackTrace()
-        return ResponseEntity(RestResponse(500, mapOf("description" to "Внутренняя ошибка сервиса")), HttpStatus.OK)
+        return ResponseEntity(RestResponse(500, mapOf("description" to "Внутренняя ошибка сервиса")), HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
     override fun handleHttpMessageNotReadable(ex: HttpMessageNotReadableException,
