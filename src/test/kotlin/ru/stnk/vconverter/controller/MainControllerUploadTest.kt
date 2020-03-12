@@ -12,6 +12,7 @@ import org.springframework.mock.web.MockMultipartFile
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation
 import org.springframework.restdocs.payload.FieldDescriptor
 import org.springframework.restdocs.payload.PayloadDocumentation
+import org.springframework.restdocs.request.RequestDocumentation
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
@@ -39,9 +40,9 @@ class MainControllerUploadTest (
     fun uploadFile() {
         val multipartFile = MockMultipartFile(
                 "file",
-                "внутри лапенко 2 серия.mp4",
+                "555.mov",
                 "multipart/form-data",
-                Files.newInputStream(Paths.get("./src/test/resources/внутри лапенко 2 серия.mp4"))
+                Files.newInputStream(Paths.get("./src/test/resources/src/555.mov"))
         )
 
         this.mockMvc.perform(
@@ -53,6 +54,10 @@ class MainControllerUploadTest (
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.id").exists())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.id", Matchers.isA<String>(String::class.java)))
                 .andDo(MockMvcRestDocumentation.document("{method-name}",
+                        RequestDocumentation.requestParts(
+                                RequestDocumentation.partWithName(multipartFile.name)
+                                        .description("Файл для загрузки")
+                        ),
                         PayloadDocumentation.responseFields(description)
                                 .and(
                                         PayloadDocumentation.fieldWithPath("data['id']")

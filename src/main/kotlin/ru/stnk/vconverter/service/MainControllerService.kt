@@ -73,6 +73,7 @@ class MainControllerService (
             uuidWithoutExtension = uuid.replace(".$fileExtention", "")
         }
         val listResource: List<Resource> = storageService.loadAsResourceDownload(uuidWithoutExtension)
+        logger.debug(listResource.toString())
         var resource: Resource? = null
         if (listResource.isNotEmpty() && listResource.size == 2) {
             if (listResource[0].filename.equals(uuid, ignoreCase = true)
@@ -85,7 +86,6 @@ class MainControllerService (
             }
         }
 
-        logger.debug("<DOWNLOAD>original uuid: $uuid; replace uuid: ${uuid.replace("jpeg", "jpg")}")
         return resource
     }
 

@@ -122,8 +122,10 @@ include::{snippets}/store-upload-file/response-body.adoc[]
 следующим `POST` запросом в формате `multipart/form-data`:
 include::{snippets}/store-upload-file/curl-request.adoc[]
 
+include::{snippets}/upload-file/request-parts.adoc[]
+
 [[resources-upload-file-response]]
-=== Ответ сервера при запросе регистрации
+=== Ответ сервера при загрузке файла
 
 Ответ сервера при успешном запросе содержит `id`
 для отслеживания статуса обработки видеофайла:
@@ -184,5 +186,5 @@ include::{snippets}/status-in-queue/response-fields.adoc[]
 include::{snippets}/exception-uuid-not-found-exception/response-body.adoc[]
 
 [[resiurces-download-file]]
-== Скачивание итогового видеофайла и превью
+== Скачивание файлов
 
