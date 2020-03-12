@@ -29,6 +29,18 @@ class ExceptionMainControllerTest(
         @Autowired val mockMvc: MockMvc
 ) {
 
+    /*
+    * 500 - Внутренняя ошибка сервиса
+    * 404 - Неправильная точка вызова
+    * 400 - Неправильный запрос
+    * 150 - Недопустимый формат файла
+    * 151 - Нет файла в запросе
+    * 152 - Неверный идентификатор
+    * 154 - Файл не найден
+    * 155 - Размер файла слишком велик (undertow закрывает соединение, кода ошибки нет)
+    *
+    * */
+
     val description: List<FieldDescriptor> = listOf(
             PayloadDocumentation.fieldWithPath("error")
                     .description("Содержит код ошибки"),
@@ -101,4 +113,39 @@ class ExceptionMainControllerTest(
                         PayloadDocumentation.responseFields(description)
                 ))
     }
+
+    @Test
+    @Throws(Exception::class)
+    fun exceptionBadRequestException() {
+        this.mockMvc.perform(
+                MockMvcRequestBuilders.get("/check")
+        )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk)
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error", Matchers.`is`(400)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.description").exists())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.description", Matchers.isA<String>(String::class.java)))
+                .andDo(MockMvcRestDocumentation.document("{method-name}",
+                        PayloadDocumentation.responseFields(description)
+                ))
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun exceptionNotFoundEndpointException() {
+        this.mockMvc.perform(
+                MockMvcRequestBuilders.get("/sdgtfxgkv")
+        )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isNotFound)
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error", Matchers.`is`(404)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.description").exists())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.description", Matchers.isA<String>(String::class.java)))
+                .andDo(MockMvcRestDocumentation.document("{method-name}",
+                        PayloadDocumentation.responseFields(description)
+                ))
+    }
+
 }

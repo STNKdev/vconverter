@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.lang.Nullable
 import org.springframework.web.bind.MissingPathVariableException
+import org.springframework.web.bind.MissingServletRequestParameterException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.context.request.WebRequest
@@ -39,13 +40,14 @@ class ExceptionHandler: ResponseEntityExceptionHandler() {
         return ResponseEntity(RestResponse(status.value(), mapOf("description" to ex.localizedMessage)), HttpStatus.OK)
     }
 
+    // Определяет ответ когда endpoint не найден
     override fun handleNoHandlerFoundException(ex: NoHandlerFoundException,
                                                headers: HttpHeaders,
                                                status: HttpStatus,
                                                request: WebRequest)
             : ResponseEntity<Any> {
 
-        return ResponseEntity(RestResponse(404, mapOf("description" to "Неправильный endpoint")), HttpStatus.OK)
+        return ResponseEntity(RestResponse(404, mapOf("description" to "Неправильная точка вызова")), HttpStatus.NOT_FOUND)
     }
 
     override fun handleMissingPathVariable(ex: MissingPathVariableException,
@@ -53,7 +55,15 @@ class ExceptionHandler: ResponseEntityExceptionHandler() {
                                            status: HttpStatus,
                                            request: WebRequest)
             : ResponseEntity<Any> {
-        return ResponseEntity(RestResponse(404, mapOf("description" to "Неправильный endpoint")), HttpStatus.OK)
+        return ResponseEntity(RestResponse(400, mapOf("description" to "Неправильный запрос")), HttpStatus.OK)
+    }
+
+    override fun handleMissingServletRequestParameter(ex: MissingServletRequestParameterException,
+                                                      headers: HttpHeaders,
+                                                      status: HttpStatus,
+                                                      request: WebRequest)
+            : ResponseEntity<Any> {
+        return ResponseEntity(RestResponse(400, mapOf("description" to "Неправильный запрос")), HttpStatus.OK)
     }
 
     @ExceptionHandler(FileExtensionException::class)

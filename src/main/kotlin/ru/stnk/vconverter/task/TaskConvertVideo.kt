@@ -70,6 +70,7 @@ class TaskConvertVideo (
                 if (line.trim().startsWith("Duration:")) {
                     miniInfo = line.trim().split(", ")
                 }
+                logger.trace(line)
             }
 
             val readerConvertVideo = BufferedReader(InputStreamReader(processConvertVideo.inputStream))
@@ -77,7 +78,7 @@ class TaskConvertVideo (
             //logger.debug(lines.toString())
             if (linesConvertVideo.isNotEmpty()) {
                 for (line in linesConvertVideo) {
-                    println(line)
+                    logger.trace(line)
                 }
             }
 
@@ -107,15 +108,15 @@ class TaskConvertVideo (
 
             val readerThumbnailError = BufferedReader(InputStreamReader(processThumbnail.errorStream))
             val linesThumbnailErr: List<String> = readerThumbnailError.readLines()
-            /*for (line in linesThumbnailErr) {
-
-            }*/
+            for (line in linesThumbnailErr) {
+                logger.trace(line)
+            }
 
             val readerThumbnail = BufferedReader(InputStreamReader(processThumbnail.inputStream))
             val linesThumbnail: List<String> = readerThumbnail.readLines()
             if (linesThumbnail.isNotEmpty()) {
                 for (line in linesThumbnail) {
-                    println(line)
+                    logger.trace(line)
                 }
             }
 
