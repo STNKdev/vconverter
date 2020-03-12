@@ -29,6 +29,7 @@ class ExceptionHandler: ResponseEntityExceptionHandler() {
                                          status: HttpStatus,
                                          request: WebRequest)
             : ResponseEntity<Any> {
+        ex.printStackTrace()
         return ResponseEntity(RestResponse(500, mapOf("description" to "Внутренняя ошибка сервиса")), HttpStatus.OK)
     }
 
@@ -37,6 +38,7 @@ class ExceptionHandler: ResponseEntityExceptionHandler() {
                                               status: HttpStatus,
                                               request: WebRequest)
             : ResponseEntity<Any> {
+        ex.printStackTrace()
         return ResponseEntity(RestResponse(status.value(), mapOf("description" to ex.localizedMessage)), HttpStatus.OK)
     }
 
@@ -91,21 +93,22 @@ class ExceptionHandler: ResponseEntityExceptionHandler() {
     fun handlerFileNotFoundException(ex: FileNotFoundException,
                                      request: WebRequest)
             :ResponseEntity<RestResponse> {
-        return ResponseEntity(RestResponse(154, mapOf("description" to ex.localizedMessage)), HttpStatus.OK)
+        logger.debug(request.toString() + "; " + ex.localizedMessage)
+        return ResponseEntity(RestResponse(153, mapOf("description" to "Файл не найден")), HttpStatus.OK)
     }
 
     @ExceptionHandler(StorageException::class)
     fun handlerStorageException(ex: StorageException,
                                 request: WebRequest)
             :ResponseEntity<RestResponse> {
-        return ResponseEntity(RestResponse(154, mapOf("description" to "Файл не найден")), HttpStatus.OK)
+        return ResponseEntity(RestResponse(153, mapOf("description" to "Файл не найден")), HttpStatus.OK)
     }
 
     @ExceptionHandler(MultipartException::class)
     fun handleMultipartException(ex: MultipartException,
                                  request: WebRequest)
             :ResponseEntity<RestResponse> {
-        return ResponseEntity(RestResponse(155, mapOf("description" to "Размер файла слишком велик")), HttpStatus.OK)
+        return ResponseEntity(RestResponse(154, mapOf("description" to "Размер файла слишком велик")), HttpStatus.OK)
     }
 
 }

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation
@@ -17,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
+import ru.stnk.vconverter.service.MainControllerService
 import java.nio.file.Files
 import java.nio.file.Paths
 
@@ -36,8 +38,8 @@ class ExceptionMainControllerTest(
     * 150 - Недопустимый формат файла
     * 151 - Нет файла в запросе
     * 152 - Неверный идентификатор
-    * 154 - Файл не найден
-    * 155 - Размер файла слишком велик (undertow закрывает соединение, кода ошибки нет)
+    * 153 - Файл не найден
+    * 154 - Размер файла слишком велик (undertow закрывает соединение, кода ошибки нет)
     *
     * */
 
@@ -89,6 +91,23 @@ class ExceptionMainControllerTest(
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk)
                 .andExpect(MockMvcResultMatchers.jsonPath("$.error", Matchers.`is`(151)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.description").exists())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.description", Matchers.isA<String>(String::class.java)))
+                .andDo(MockMvcRestDocumentation.document("{method-name}",
+                        PayloadDocumentation.responseFields(description)
+                ))
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun exceptionFileNotFoundException() {
+        this.mockMvc.perform(
+                MockMvcRequestBuilders.get("/download/8651eb16-dfd4-4a3b-ab00-0f2a356289ab.mp4")
+        )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk)
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error", Matchers.`is`(153)))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.description").exists())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.description", Matchers.isA<String>(String::class.java)))
                 .andDo(MockMvcRestDocumentation.document("{method-name}",
