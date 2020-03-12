@@ -113,10 +113,10 @@ include::{snippets}/store-upload-file/response-body.adoc[]
 [[resources-upload-file]]
 == Загрузка файла
 
-Точка вызова для загрузки файла `/upload`
+Точка вызова для загрузки файла `POST /upload`
 
 [[resources-upload-file-request]]
-=== POST запрос загрузки файла
+=== Пример запроса
 
 Загрузка видеофайла размером не более `10MB` осуществляется
 следующим `POST` запросом в формате `multipart/form-data`:
@@ -125,7 +125,7 @@ include::{snippets}/store-upload-file/curl-request.adoc[]
 include::{snippets}/upload-file/request-parts.adoc[]
 
 [[resources-upload-file-response]]
-=== Ответ сервера при загрузке файла
+=== Пример ответа
 
 Ответ сервера при успешном запросе содержит `id`
 для отслеживания статуса обработки видеофайла:
@@ -149,10 +149,10 @@ include::{snippets}/exception-multipart-file-empty/response-body.adoc[]
 [[resources-check]]
 == Проверка статуса обработки видеофайла
 
-Точка вызова для проверки статуса видеофайла: `/check`
+Точка вызова для проверки статуса видеофайла: `GET /check`
 
 [[resources-check-request]]
-=== Запрос на проверку
+=== Пример запроса
 
 Нужно сформировать `GET` запрос с обязательным параметром `id`:
 include::{snippets}/status-in-queue/curl-request.adoc[]
@@ -160,7 +160,7 @@ include::{snippets}/status-in-queue/curl-request.adoc[]
 include::{snippets}/status-in-queue/request-parameters.adoc[]
 
 [[resources-check-response]]
-=== Ответ сервера при запросе на проверку
+=== Пример ответа
 
 Ответ сервера при успешном `GET` запросе будет включать в себя
 один из трёх возможных статусов:
@@ -188,3 +188,20 @@ include::{snippets}/exception-uuid-not-found-exception/response-body.adoc[]
 [[resiurces-download-file]]
 == Скачивание файлов
 
+Точка вызова для скачивания обработанных файлов `GET /download`
+
+=== Пример запроса
+
+Для скачивания видеофайла нужно сформировать `GET` запрос:
+include::{snippets}/download-video-file/curl-request.adoc[]
+
+include::{snippets}/download-video-file/path-parameters.adoc[]
+
+Для скачивания превью нужно сформировать `GET` запрос:
+include::{snippets}/download-image-file/curl-request.adoc[]
+
+include::{snippets}/download-image-file/path-parameters.adoc[]
+
+=== Пример ответа
+
+include::{snippets}/download-image-file/http-response.adoc[lines=1..8]

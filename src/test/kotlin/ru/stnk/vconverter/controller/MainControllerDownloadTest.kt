@@ -14,8 +14,10 @@ import org.springframework.core.io.Resource
 import org.springframework.core.io.UrlResource
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
+import org.springframework.restdocs.headers.HeaderDocumentation
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders
+import org.springframework.restdocs.payload.PayloadDocumentation
 import org.springframework.restdocs.request.RequestDocumentation
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.servlet.MockMvc
@@ -59,15 +61,18 @@ class MainControllerDownloadTest (
     fun downloadVideoFile() {
 
         this.mockMvc.perform(
-                RestDocumentationRequestBuilders.get("/download/{id-file}", "$idString.mp4")
+                RestDocumentationRequestBuilders.get("/download/{id}.mp4", idString)
         )
-                .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_OCTET_STREAM))
                 .andExpect(MockMvcResultMatchers.header().string(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=$idString.mp4"))
                 .andDo(MockMvcRestDocumentation.document("{method-name}",
                         RequestDocumentation.pathParameters(
-                                RequestDocumentation.parameterWithName("id-file")
-                                        .description("{id} обработанного видеофайла с расширением mp4")
+                                RequestDocumentation.parameterWithName("id")
+                                        .description("id обработанного видеофайла с расширением .mp4")
+                        ),
+                        HeaderDocumentation.responseHeaders(
+                                HeaderDocumentation.headerWithName("Content-Disposition")
+                                        .description("Указывает на скачиваемый видеофайл")
                         )
                 ))
 
@@ -80,15 +85,18 @@ class MainControllerDownloadTest (
     fun downloadImageFile() {
 
         this.mockMvc.perform(
-                RestDocumentationRequestBuilders.get("/download/{id-file}", "$idString.jpg")
+                RestDocumentationRequestBuilders.get("/download/{id}.jpg", idString)
         )
-                .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_OCTET_STREAM))
                 .andExpect(MockMvcResultMatchers.header().string(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=$idString.jpg"))
                 .andDo(MockMvcRestDocumentation.document("{method-name}",
                         RequestDocumentation.pathParameters(
-                                RequestDocumentation.parameterWithName("id-file")
-                                        .description("{id} обработанного видеофайла с расширением jpg")
+                                RequestDocumentation.parameterWithName("id")
+                                        .description("id обработанного видеофайла с расширением .jpg")
+                        ),
+                        HeaderDocumentation.responseHeaders(
+                                HeaderDocumentation.headerWithName("Content-Disposition")
+                                        .description("Указывает на скачиваемое изображение")
                         )
                 ))
 
