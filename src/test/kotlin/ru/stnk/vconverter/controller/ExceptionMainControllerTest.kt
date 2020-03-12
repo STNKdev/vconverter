@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation
@@ -18,7 +17,6 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
-import ru.stnk.vconverter.service.MainControllerService
 import java.nio.file.Files
 import java.nio.file.Paths
 
@@ -55,7 +53,7 @@ class ExceptionMainControllerTest(
     @Test
     @Throws(Exception::class)
     fun exceptionFileExtension() {
-        val multipartFile: MockMultipartFile = MockMultipartFile(
+        val multipartFile = MockMultipartFile(
                 "file",
                 "внутри лапенко 2 серия.gif",
                 "multipart/form-data",
@@ -79,7 +77,7 @@ class ExceptionMainControllerTest(
     @Test
     @Throws(Exception::class)
     fun exceptionMultipartFileEmpty() {
-        val multipartFile: MockMultipartFile = MockMultipartFile(
+        val multipartFile = MockMultipartFile(
                 "file",
                 byteArrayOf()
         )
