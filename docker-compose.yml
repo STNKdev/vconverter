@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+
+    app:
+        image: openjdk:8-jdk-alpine
+        restart: always
+        container_name: vconverter
+        environment:
+            #- spring_profiles_active=docker
+            - jargs=-agentlib:jdwp=transport=dt_socket,address=5005,server=y,suspend=n -Djava.security.egd=file:/dev/./urandom -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Xmx256m -Xss512k -XX:MetaspaceSize=100m
+            - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/vconverter_db
+        volumes:
+            - ./app:/app
+        working_dir: /app
+        entrypoint: sh -c 'apk update && apk install ffmpeg && cd /app && java $$jargs -jar /app/*.jar'
+        ports:
+            - "8080:8080"
+            - "127.0.0.1:5005:5005"
+        links:
+            - db
+            
+    db:
+        image: postgres:11.6
+        restart: always
+        container_name: vconverter_app_db
+        environment:
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=test123
+            - POSTGRES_DB=vconverter_db
+        volumes:
+            - container_data:/var/lib/postgresql/data/
+        ports:
+            - "5432:5432"
+volumes:
+    container_data:
