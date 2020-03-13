@@ -204,8 +204,10 @@ include::{snippets}/download-image-file/path-parameters.adoc[]
 
 Ответом будет запрошенный файл.
 
-//include::{snippets}/download-image-file/http-response.adoc[tag=headers]
-include::h.adoc[]
+[source,http,options="nowrap"]
+----
+include::{snippets}/download-image-file/http-response.adoc[tag=headers]
+----
 
 === Ошибки
 

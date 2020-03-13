@@ -77,7 +77,7 @@ tasks {
         /*sources(delegateClosureOf<PatternSet> {
             include("toplevel.adoc", "another.adoc", "third.adoc")
         })*/
-        outputDir = file("docs/html5")
+        outputDir = file("docs/")
 
         /*attributes(
             mapOf(
