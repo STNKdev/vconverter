@@ -9,6 +9,8 @@ download/
 app.log*
 vconverter.log*
 logs/
+backup database in sql.txt
+vconverter_db.sql
 
 ### STS ###
 .apt_generated
