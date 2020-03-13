@@ -7,8 +7,6 @@ Aleksandr Sytnik;
 :toclevels: 4
 :sectlinks:
 :toc-title: API
-:operation-curl-request-title: Пример запроса
-:operation-http-response-title: Пример ответа
 
 [[overview]]
 = Краткий обзор
@@ -134,7 +132,7 @@ include::{snippets}/store-upload-file/response-body.adoc[]
 include::{snippets}/store-upload-file/response-fields.adoc[]
 
 [[resources-upload-file-exception]]
-=== Ошибки при загрузке файла
+=== Ошибки
 
 Если файл гораздо больше `10MB`, то сервер закроет соединение.
 
@@ -177,7 +175,7 @@ include::{snippets}/status-done/response-body.adoc[]
 include::{snippets}/status-in-queue/response-fields.adoc[]
 
 [[resources-check-errors]]
-=== Ошибки при проверке статуса
+=== Ошибки
 
 При проверке статуса обработки видеофайла возможна
 следующая ошибка:
@@ -204,4 +202,14 @@ include::{snippets}/download-image-file/path-parameters.adoc[]
 
 === Пример ответа
 
-include::{snippets}/download-image-file/http-response.adoc[lines=1..8]
+Ответом будет запрошенный файл.
+
+//include::{snippets}/download-image-file/http-response.adoc[tag=headers]
+include::h.adoc[]
+
+=== Ошибки
+
+При попытке скачать файл может возникнуть ошибка:
+
+* 153 - Файл не найден
+include::{snippets}/exception-file-not-found-exception/response-body.adoc[]

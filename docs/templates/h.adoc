@@ -1,0 +1,4 @@
+[source,http,options="nowrap"]
+----
+include::{snippets}/download-image-file/http-response.adoc[tag=headers]
+----
