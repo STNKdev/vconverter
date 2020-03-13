@@ -1,6 +1,7 @@
 package ru.stnk.vconverter.controller
 
 import org.hamcrest.Matchers
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -18,6 +19,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
+import ru.stnk.vconverter.storage.FileSystemStorageService
 import java.nio.file.Files
 import java.nio.file.Paths
 
@@ -27,7 +29,8 @@ import java.nio.file.Paths
 @SpringBootTest
 @AutoConfigureRestDocs(outputDir = "build/generated-snippets")
 class MainControllerUploadTest (
-        @Autowired val mockMvc: MockMvc
+        @Autowired val mockMvc: MockMvc,
+        @Autowired val fs: FileSystemStorageService
 ) {
 
     val description: List<FieldDescriptor> = listOf(
@@ -67,6 +70,11 @@ class MainControllerUploadTest (
 
         //verify(fileSystemStorageService, times(1)).storeTemp(multipartFile)
 
+    }
+
+    @AfterAll
+    fun clean() {
+        fs.deleteAllTemp()
     }
 
 }
