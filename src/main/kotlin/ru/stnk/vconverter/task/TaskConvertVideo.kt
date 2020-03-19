@@ -48,11 +48,12 @@ class TaskConvertVideo (
 
         //val commandWindows: List<String> = listOf("cmd.exe", "/c", "ffmpeg", "-hide_banner", "-i", file.toString(), "-s", "426x240", "${storageService.downloadDir.resolve("$uuid.mp4")}")
         val commandWindowsConvertVideo: List<String> = listOf("cmd.exe", "/c", "ffmpeg", "-hide_banner", "-i", file.toString(), "-s", "426x240", downloadFileData.pathVideoFile)
-        val commandLinuxConvertVideo: List<String> = listOf("sh", "-c", "ffmpeg", "-hide_banner", "-i", file.toString(), "-s", "426x240", downloadFileData.pathVideoFile)
+        val commandLinuxConvertVideo: List<String> = listOf("ffmpeg", "-hide_banner", "-i", file.toString(), "-s", "426x240", downloadFileData.pathVideoFile)
 
         if (isWindows) {
             processBuilderVideoConverter.command(commandWindowsConvertVideo)
         } else {
+            logger.debug(commandLinuxConvertVideo.toString())
             processBuilderVideoConverter.command(commandLinuxConvertVideo)
         }
 
@@ -94,7 +95,7 @@ class TaskConvertVideo (
             val processBuilderThumbnail = ProcessBuilder()
 
             val commandWindowsThumbnail: List<String> = listOf("cmd.exe", "/c", "ffmpeg", "-hide_banner", "-ss", (fullDurationInSeconds/2).toString(), "-i", file.toString(), "-vframes", "1", "-an", downloadFileData.pathImageFile)
-            val commandLinuxThumbnail: List<String> = listOf("sh", "-c", "ffmpeg", "-hide_banner", "-ss", (fullDurationInSeconds/2).toString(), "-i", file.toString(), "-vframes", "1", "-an", downloadFileData.pathImageFile)
+            val commandLinuxThumbnail: List<String> = listOf("ffmpeg", "-hide_banner", "-ss", (fullDurationInSeconds/2).toString(), "-i", file.toString(), "-vframes", "1", "-an", downloadFileData.pathImageFile)
 
             if (isWindows) {
                 processBuilderThumbnail.command(commandWindowsThumbnail)

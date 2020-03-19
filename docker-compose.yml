@@ -13,7 +13,7 @@ services:
         volumes:
             - ./app:/app
         working_dir: /app
-        entrypoint: sh -c 'apk update && apk install ffmpeg && cd /app && java $$jargs -jar /app/*.jar'
+        entrypoint: sh -c 'apk update && apk upgrade && apk add ffmpeg && cd /app && java $$jargs -jar /app/*.jar'
         ports:
             - "8080:8080"
             - "127.0.0.1:5005:5005"

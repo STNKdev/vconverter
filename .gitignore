@@ -11,6 +11,8 @@ vconverter.log*
 logs/
 backup database in sql.txt
 vconverter_db.sql
+install_ffmpeg.sh
+/app/
 
 ### STS ###
 .apt_generated
