@@ -7,8 +7,13 @@ import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing
 import org.springframework.scheduling.annotation.EnableAsync
+import ru.stnk.vconverter.entity.UploadFileStatus
+import ru.stnk.vconverter.repository.UploadFileStatusRepository
 import ru.stnk.vconverter.storage.FileSystemStorageService
 import ru.stnk.vconverter.storage.StorageProperties
+import ru.stnk.vconverter.task.TaskConvertVideo
+import java.io.File
+import java.nio.file.Path
 
 
 @SpringBootApplication
@@ -18,9 +23,34 @@ import ru.stnk.vconverter.storage.StorageProperties
 class VconverterApplication {
 
 	@Bean
-	fun init(fileSystemStorageService: FileSystemStorageService): CommandLineRunner {
+	fun init(fileSystemStorageService: FileSystemStorageService,
+			 fileStatusRepository: UploadFileStatusRepository,
+			 taskConvertVideo: TaskConvertVideo): CommandLineRunner {
 		return CommandLineRunner {
-			fileSystemStorageService.deleteAllTemp()
+			//fileSystemStorageService.deleteAllTemp()
+			//-----
+			// Формируем весь список статусов файлов
+			val filesTmp: List<UploadFileStatus> = fileStatusRepository.findAll()
+			if (filesTmp.isNotEmpty()) {
+				for(file in filesTmp) {
+					if (file.status.equals("В очереди")
+							|| file.status.equals("Обрабатывается")) {
+						//
+						val path: Path = fileSystemStorageService.loadTemp(file.uuid)
+						val fileTmp: File = path.toFile()
+						// Проверяем что файл существует и читается
+						if (fileTmp.exists() && fileTmp.canRead()) {
+							// удаляем директорию с начатым обработанным файлом
+							fileSystemStorageService.deleteFileDownload(file.uuid)
+							// удаляем запись со статусом, т.к. она создастся заново
+							fileStatusRepository.delete(file)
+							// запускаем задачу в фоновом режиме (ставим в очередь на выполнение)
+							taskConvertVideo.runTask(file.uuid)
+						}
+					}
+				}
+			}
+			//-----
 			fileSystemStorageService.init()
 		}
 	}

@@ -227,4 +227,17 @@ class FileSystemStorageService(
         }
     }
 
+    fun deleteFileDownload(uuid: String) {
+        val downloadFileData: DownloadFileData? = downloadFileDataRepository.findByUuid(uuid)
+        logger.debug("<DELETE> Файл для удаления: $downloadFileData")
+        if (downloadFileData != null) {
+            downloadFileDataRepository.delete(downloadFileData)
+            val delFSUtils = FileSystemUtils.deleteRecursively(Paths.get(downloadFileData.directoryName))
+            //val delFiles = Files.deleteIfExists(Paths.get(uploadFileData.path))
+            logger.debug("Удаление ${downloadFileData.directoryName}: $delFSUtils")
+        } else {
+            throw StorageException("Не удалось удалить файл с uuid: $uuid")
+        }
+    }
+
 }
